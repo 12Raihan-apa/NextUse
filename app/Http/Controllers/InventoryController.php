@@ -1,4 +1,3 @@
-++ app/Http/Controllers/InventoryController.php
 <?php
 
 namespace App\Http\Controllers;
@@ -10,10 +9,15 @@ class InventoryController extends Controller
 {
     public function index(Request $request)
     {
-        $items = Item::query()
-            ->latest('listed_at')
-            ->latest()
-            ->get();
+        try {
+            $items = Item::query()
+                ->latest('listed_at')
+                ->latest()
+                ->get();
+        } catch (\Exception $e) {
+            // Jika tabel belum ada, gunakan data dummy
+            $items = collect([]);
+        }
 
         if ($items->isEmpty()) {
             $items = collect([
@@ -64,6 +68,7 @@ class InventoryController extends Controller
             ->all();
 
         return view('inventory.index', [
+            'title' => 'Inventori Saya',
             'items' => $items,
             'categories' => $categories,
             'statuses' => Item::STATUS_LABELS,
